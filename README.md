@@ -30,3 +30,7 @@ train_ratio = 1
 ```
 
 After the script finishes it will generate a file `predictions.csv` which is used for submission to Kaggle.
+
+Acknowledge:
+
+Thank our founder Ozel Christo, Andrei Ciobotar and all colleagues at Neokami for supporting and encouragement! Thank our team member Felix Berkhahn and Aleksandra Pachalieva for helping me out near the end of the competition for preparing additional features and visualization.
