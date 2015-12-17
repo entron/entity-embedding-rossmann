@@ -14,7 +14,7 @@ python3 extract_fb_features.py # Extract forward/backward looking features
 python3 prepare_features.py
 ``` 
 
-To test the neural network model run
+To test the neural network model run (you to have [keras](https://github.com/fchollet/keras) installed first)
 
 ```
 python3 test_model.py
