@@ -52,4 +52,4 @@ with open('predictions.csv', 'w') as f:
     for i, record in enumerate(test_X):
         store_open = record[0]
         guessed_sales = numpy.mean([model.guess(record) for model in models]) if store_open else 0
-        w.write('{},{}\n'.format(i+1, guessed_sales))
+        f.write('{},{}\n'.format(i+1, guessed_sales))
