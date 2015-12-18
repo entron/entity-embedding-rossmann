@@ -47,14 +47,9 @@ print(r)
 with open('feature_test_data.pickle', 'rb') as f:
     test_X = pickle.load(f)
 
-test_index = 1
 with open('predictions.csv', 'w') as f:
     f.write('Id,Sales\n')
-    for record in test_X:
+    for i, record in enumerate(test_X):
         store_open = record[0]
-        if store_open == 0:
-            f.write(str(test_index) + "," + str(0) + '\n')
-        else:
-            guessed_sales = numpy.mean([model.guess(record) for model in models])
-            f.write(str(test_index) + "," + str(guessed_sales) + '\n')
-        test_index += 1
+        guessed_sales = numpy.mean([model.guess(record) for model in models]) if store_open else 0
+        w.write('{},{}\n'.format(i+1, guessed_sales))
