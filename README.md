@@ -10,7 +10,8 @@ Next run the following scripts to extract and prepare features:
 python3 extract.py
 python3 extract_weather.py
 python3 extract_google_trend.py
-python3 extract_fb_features.py 
+python3 extract_fb_features.py
+python3 prepare_features.py
 ``` 
 
 extract_google_trend.py is written by Felix Berkhahn to extract forward/backward looking features.
