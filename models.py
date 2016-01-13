@@ -45,7 +45,7 @@ class Model(object):
         self.y, self.y_val = self.y[:self.train_size], self.y[self.train_size:]
 
 
-class NN_with_CategoryEmbedding(Model):
+class NN_with_EntityEmbedding(Model):
 
     def __init__(self, train_ratio):
         super().__init__(train_ratio)

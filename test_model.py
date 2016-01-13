@@ -1,5 +1,5 @@
 import pickle
-from models import NN_with_CategoryEmbedding
+from models import NN_with_EntityEmbedding
 import math
 import numpy
 import sys
@@ -14,8 +14,8 @@ with open('feature_train_data.pickle', 'rb') as f:
 
 models = []
 for i in range(num_networks):
-    print("Fitting NN_with_CategoryEmbedding...")
-    models.append(NN_with_CategoryEmbedding(train_ratio))
+    print("Fitting NN_with_EntityEmbedding...")
+    models.append(NN_with_EntityEmbedding(train_ratio))
 
 with open('models.pickle', 'wb') as f:
     pickle.dump(models, f, -1)
