@@ -1,0 +1,5 @@
+*.pickle
+*.pyc
+store.csv
+test.csv
+train.csv
