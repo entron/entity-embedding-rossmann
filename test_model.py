@@ -17,6 +17,9 @@ for i in range(num_networks):
     print("Fitting NN_with_CategoryEmbedding...")
     models.append(NN_with_CategoryEmbedding(train_ratio))
 
+with open('models.pickle', 'wb') as f:
+    pickle.dump(models, f, -1)
+
 
 def evaluate_models(models, num_records):
     model0 = models[0]
