@@ -14,8 +14,6 @@ python3 extract_fb_features.py
 python3 prepare_features.py
 ``` 
 
-extract_google_trend.py is written by Felix Berkhahn to extract forward/backward looking features.
-
 To test the neural network model run (you need to have [keras](https://github.com/fchollet/keras) installed first)
 
 ```
@@ -35,4 +33,4 @@ After the script finishes it will generate a file `predictions.csv` which is use
 
 Acknowledge:
 
-Thank our founder Ozel Christo, Andrei Ciobotar and all colleagues at Neokami for supporting and encouragement! Thank our team member Felix Berkhahn and Aleksandra Pachalieva for helping me out near the end of the competition for preparing additional features and visualization.
+Thank our founder Ozel Christo, Andrei Ciobotar and all colleagues at Neokami for supporting and encouragement! 
