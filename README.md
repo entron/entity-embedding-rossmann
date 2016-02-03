@@ -33,11 +33,19 @@ After the script finishes it will generate a file `predictions.csv` which is use
 
 You can anaylize the embeddings with the ipython notebook included. This is the learned embeeding of German States printed in 2D:
 
-<iframe width="900" height="800" frameborder="0" scrolling="no" src="https://plot.ly/~entron/0.embed"></iframe>
+<div>
+    <a href="https://plot.ly/~entron/0/" target="_blank" title="Learned Embedding of German States from Kaggle Rossmann Competition" style="display: block; text-align: center;"><img src="https://plot.ly/~entron/0.png" alt="Learned Embedding of German States from Kaggle Rossmann Competition" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <script data-plotly="entron:0"  src="https://plot.ly/embed.js" async></script>
+</div>
+
 
 and this is the learned embeddings of 1115 Rossmann stores printed in 3D.
 
-<iframe width="900" height="800" frameborder="0" scrolling="no" src="https://plot.ly/~entron/2.embed"></iframe>
+<div>
+    <a href="https://plot.ly/~entron/2/" target="_blank" title="Learned Embeddings of the 1115 Rossmann Stores" style="display: block; text-align: center;"><img src="https://plot.ly/~entron/2.png" alt="Learned Embeddings of the 1115 Rossmann Stores" style="max-width: 100%;width: 1000px;"  width="1000" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <script data-plotly="entron:2"  src="https://plot.ly/embed.js" async></script>
+</div>
+
 
 Acknowledge:
 
