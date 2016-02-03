@@ -31,6 +31,14 @@ train_ratio = 1
 
 After the script finishes it will generate a file `predictions.csv` which is used for submission to Kaggle.
 
+You can anaylize the embeddings with the ipython notebook included. This is the learned embeeding of German States printed in 2D:
+
+<iframe width="900" height="800" frameborder="0" scrolling="no" src="https://plot.ly/~entron/0.embed"></iframe>
+
+and this is the learned embeddings of 1115 Rossmann stores printed in 3D.
+
+<iframe width="900" height="800" frameborder="0" scrolling="no" src="https://plot.ly/~entron/2.embed"></iframe>
+
 Acknowledge:
 
 Thank our founder Ozel Christo, Andrei Ciobotar and all colleagues at Neokami for supporting and encouragement! 
