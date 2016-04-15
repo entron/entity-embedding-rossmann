@@ -173,7 +173,7 @@ class KNN(Model):
         print("Result on validation data: ", self.evaluate(self.normalizer.transform(X_val), y_val))
 
     def guess(self, feature):
-        return numpy.exp(self.clf.predict(self.normalizer.trainsform(feature)))
+        return numpy.exp(self.clf.predict(self.normalizer.transform(feature)))
 
 
 class NN_with_EntityEmbedding(Model):
