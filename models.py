@@ -92,7 +92,6 @@ class RF(Model):
 
     def __init__(self, X_train, y_train, X_val, y_val):
         super().__init__()
-        self.__normalize_data()
         self.clf = RandomForestRegressor(n_estimators=200, verbose=True, max_depth=35, min_samples_split=2,
                                          min_samples_leaf=1)
         self.clf.fit(X_train, numpy.log(y_train))
@@ -127,7 +126,6 @@ class XGBoost(Model):
 
     def __init__(self, X_train, y_train, X_val, y_val):
         super().__init__()
-        self.__normalize_data()
         dtrain = xgb.DMatrix(X_train, label=numpy.log(y_train))
         evallist = [(dtrain, 'train')]
         param = {'nthread': -1,
@@ -175,7 +173,7 @@ class KNN(Model):
         print("Result on validation data: ", self.evaluate(self.normalizer.transform(X_val), y_val))
 
     def guess(self, feature):
-        return numpy.exp(self.clf.predict(self.normalizer.trainsform(feature)))
+        return numpy.exp(self.clf.predict(self.normalizer.transform(feature)))
 
 
 class NN_with_EntityEmbedding(Model):
