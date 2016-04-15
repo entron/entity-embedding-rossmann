@@ -67,8 +67,8 @@ for i in range(5):
 # print("Fitting HistricalMedian...")
 # models.append(HistricalMedian(X_train, y_train, X_val, y_val))
 
-with open('models.pickle', 'wb') as f:
-    pickle.dump(models, f)
+# with open('models.pickle', 'wb') as f:
+#     pickle.dump(models, f)
 
 
 def evaluate_models(models, X, y):
