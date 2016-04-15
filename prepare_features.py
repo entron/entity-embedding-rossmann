@@ -7,8 +7,6 @@ import numpy as np
 with open('train_data.pickle', 'rb') as f:
     train_data = pickle.load(f)
     num_records = len(train_data)
-with open('test_data.pickle', 'rb') as f:
-    test_data = pickle.load(f)
 with open('store_data.pickle', 'rb') as f:
     store_data = pickle.load(f)
 
@@ -48,36 +46,24 @@ for record in train_data:
         train_data_y.append(int(record['Sales']))
 print("Number of train datapoints: ", len(train_data_y))
 
-test_data_X = []
-for record in test_data:
-    fl = feature_list(record)
-    test_data_X.append(fl)
-print("Number of test datapoints: ", len(test_data_X))
-
 print(min(train_data_y), max(train_data_y))
 
-full_X = train_data_X + test_data_X
+full_X = train_data_X
 full_X = np.array(full_X)
 train_data_X = np.array(train_data_X)
-test_data_X = np.array(test_data_X)
 les = []
 for i in range(train_data_X.shape[1]):
     le = preprocessing.LabelEncoder()
     le.fit(full_X[:, i])
     les.append(le)
     train_data_X[:, i] = le.transform(train_data_X[:, i])
-    test_data_X[:, i] = le.transform(test_data_X[:, i])
 
 with open('les.pickle', 'wb') as f:
     pickle.dump(les, f, -1)
 
 train_data_X = train_data_X.astype(int)
-test_data_X = test_data_X.astype(int)
 train_data_y = np.array(train_data_y)
 
 with open('feature_train_data.pickle', 'wb') as f:
     pickle.dump((train_data_X, train_data_y), f, -1)
     print(train_data_X[0], train_data_y[0])
-
-with open('feature_test_data.pickle', 'wb') as f:
-    pickle.dump(test_data_X, f, -1)
