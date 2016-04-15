@@ -92,7 +92,6 @@ class RF(Model):
 
     def __init__(self, X_train, y_train, X_val, y_val):
         super().__init__()
-        self.__normalize_data()
         self.clf = RandomForestRegressor(n_estimators=200, verbose=True, max_depth=35, min_samples_split=2,
                                          min_samples_leaf=1)
         self.clf.fit(X_train, numpy.log(y_train))
