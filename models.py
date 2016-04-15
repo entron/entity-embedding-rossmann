@@ -1,75 +1,195 @@
-import pickle
-import numpy
-import math
-
+from sklearn import linear_model
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
+import numpy
+import xgboost as xgb
+from sklearn import neighbors
+from sklearn.preprocessing import Normalizer
 
 from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation, Merge, Reshape
+from keras.layers.core import Dense, Activation, Merge, Reshape
 from keras.layers.embeddings import Embedding
 from keras.callbacks import ModelCheckpoint
 
-from prepare_nn_features import split_features
+import pickle
+
+
+def embed_features(X, saved_embeddings_fname):
+    # f_embeddings = open("embeddings_shuffled.pickle", "rb")
+    f_embeddings = open(saved_embeddings_fname, "rb")
+    embeddings = pickle.load(f_embeddings)
+
+    index_embedding_mapping = {1: 0, 2: 1, 4: 2, 5: 3, 6: 4, 7: 5}
+    X_embedded = []
+
+    (num_records, num_features) = X.shape
+    for record in X:
+        embedded_features = []
+        for i, feat in enumerate(record):
+            feat = int(feat)
+            if i not in index_embedding_mapping.keys():
+                embedded_features += [feat]
+            else:
+                embedding_index = index_embedding_mapping[i]
+                embedded_features += embeddings[embedding_index][feat].tolist()
+
+        X_embedded.append(embedded_features)
+
+    return numpy.array(X_embedded)
+
+
+def split_features(X):
+    X_list = []
+
+    store_index = X[..., [1]]
+    X_list.append(store_index)
+
+    day_of_week = X[..., [2]]
+    X_list.append(day_of_week)
+
+    promo = X[..., [3]]
+    X_list.append(promo)
+
+    year = X[..., [4]]
+    X_list.append(year)
+
+    month = X[..., [5]]
+    X_list.append(month)
+
+    day = X[..., [6]]
+    X_list.append(day)
+
+    State = X[..., [7]]
+    X_list.append(State)
+
+    return X_list
 
 
 class Model(object):
 
-    def __init__(self, train_ratio):
-        self.train_ratio = train_ratio
-        self.__load_data()
-
-    def evaluate(self):
-        if self.train_ratio == 1:
-            return 0
-        total_sqe = 0
-        num_real_test = 0
-        for record, sales in zip(self.X_val, self.y_val):
-            if sales == 0:
-                continue
-            guessed_sales = self.guess(record)
-            sqe = ((sales - guessed_sales) / sales) ** 2
-            total_sqe += sqe
-            num_real_test += 1
-        result = math.sqrt(total_sqe / num_real_test)
+    def evaluate(self, X_val, y_val):
+        assert(min(y_val) > 0)
+        guessed_sales = self.guess(X_val)
+        relative_err = numpy.absolute((y_val - guessed_sales) / y_val)
+        result = numpy.sum(relative_err) / len(y_val)
         return result
 
-    def __load_data(self):
-        f = open('feature_train_data.pickle', 'rb')
-        (self.X, self.y) = pickle.load(f)
-        self.X = numpy.array(self.X)
-        self.y = numpy.array(self.y)
-        self.num_records = len(self.X)
-        self.train_size = int(self.train_ratio * self.num_records)
-        self.test_size = self.num_records - self.train_size
-        self.X, self.X_val = self.X[:self.train_size], self.X[self.train_size:]
-        self.y, self.y_val = self.y[:self.train_size], self.y[self.train_size:]
+
+class LinearModel(Model):
+
+    def __init__(self, X_train, y_train, X_val, y_val):
+        super().__init__()
+        self.clf = linear_model.LinearRegression()
+        self.clf.fit(X_train, numpy.log(y_train))
+        print("Result on validation data: ", self.evaluate(X_val, y_val))
+
+    def guess(self, feature):
+        return numpy.exp(self.clf.predict(feature))
+
+
+class RF(Model):
+
+    def __init__(self, X_train, y_train, X_val, y_val):
+        super().__init__()
+        self.__normalize_data()
+        self.clf = RandomForestRegressor(n_estimators=200, verbose=True, max_depth=35, min_samples_split=2,
+                                         min_samples_leaf=1)
+        self.clf.fit(X_train, numpy.log(y_train))
+        print("Result on validation data: ", self.evaluate(X_val, y_val))
+
+    def guess(self, feature):
+        return numpy.exp(self.clf.predict(feature))
+
+
+class SVM(Model):
+
+    def __init__(self, X_train, y_train, X_val, y_val):
+        super().__init__()
+        self.X_train = X_train
+        self.y_train = y_train
+        self.__normalize_data()
+        self.clf = SVR(kernel='linear', degree=3, gamma='auto', coef0=0.0, tol=0.001,
+                       C=1.0, epsilon=0.1, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
+
+        self.clf.fit(self.X_train, numpy.log(self.y_train))
+        print("Result on validation data: ", self.evaluate(X_val, y_val))
+
+    def __normalize_data(self):
+        self.scaler = StandardScaler()
+        self.X_train = self.scaler.fit_transform(self.X_train)
+
+    def guess(self, feature):
+        return numpy.exp(self.clf.predict(feature))
+
+
+class XGBoost(Model):
+
+    def __init__(self, X_train, y_train, X_val, y_val):
+        super().__init__()
+        self.__normalize_data()
+        dtrain = xgb.DMatrix(X_train, label=numpy.log(y_train))
+        evallist = [(dtrain, 'train')]
+        param = {'nthread': -1,
+                 'max_depth': 7,
+                 'eta': 0.02,
+                 'silent': 1,
+                 'objective': 'reg:linear',
+                 'colsample_bytree': 0.7,
+                 'subsample': 0.7}
+        num_round = 3000
+        self.bst = xgb.train(param, dtrain, num_round, evallist)
+        print("Result on validation data: ", self.evaluate(X_val, y_val))
+
+    def guess(self, feature):
+        dtest = xgb.DMatrix(feature)
+        return numpy.exp(self.bst.predict(dtest))
+
+
+class HistricalMedian(Model):
+
+    def __init__(self, X_train, y_train, X_val, y_val):
+        super().__init__()
+        self.history = {}
+        self.feature_index = [1, 2, 3, 4]
+        for x, y in zip(X_train, y_train):
+            key = tuple(x[self.feature_index])
+            self.history.setdefault(key, []).append(y)
+        print("Result on validation data: ", self.evaluate(X_val, y_val))
+
+    def guess(self, features):
+        features = numpy.array(features)
+        features = features[:, self.feature_index]
+        guessed_sales = [numpy.median(self.history[tuple(feature)]) for feature in features]
+        return numpy.array(guessed_sales)
+
+
+class KNN(Model):
+
+    def __init__(self, X_train, y_train, X_val, y_val):
+        super().__init__()
+        self.normalizer = Normalizer()
+        self.normalizer.fit(X_train)
+        self.clf = neighbors.KNeighborsRegressor(n_neighbors=10, weights='distance', p=1)
+        self.clf.fit(self.normalizer.transform(X_train), numpy.log(y_train))
+        print("Result on validation data: ", self.evaluate(self.normalizer.transform(X_val), y_val))
+
+    def guess(self, feature):
+        return numpy.exp(self.clf.predict(self.normalizer.trainsform(feature)))
 
 
 class NN_with_EntityEmbedding(Model):
 
-    def __init__(self, train_ratio):
-        super().__init__(train_ratio)
-        self.build_preprocessor(self.X)
-        self.nb_epoch = 20
+    def __init__(self, X_train, y_train, X_val, y_val):
+        super().__init__()
+        self.nb_epoch = 10
         self.checkpointer = ModelCheckpoint(filepath="best_model_weights.hdf5", verbose=1, save_best_only=True)
-        self.max_log_y = numpy.max(numpy.log(self.y))
-        self.min_log_y = numpy.min(numpy.log(self.y))
+        self.max_log_y = max(numpy.max(numpy.log(y_train)), numpy.max(numpy.log(y_val)))
         self.__build_keras_model()
-        self.fit()
-
-    def build_preprocessor(self, X):
-        X_list = split_features(X)
-        # Google trend de
-        self.gt_de_enc = StandardScaler()
-        self.gt_de_enc.fit(X_list[32])
-        # Google trend state
-        self.gt_state_enc = StandardScaler()
-        self.gt_state_enc.fit(X_list[33])
+        self.fit(X_train, y_train, X_val, y_val)
 
     def preprocessing(self, X):
         X_list = split_features(X)
-        X_list[32] = self.gt_de_enc.transform(X_list[32])
-        X_list[33] = self.gt_state_enc.transform(X_list[33])
         return X_list
 
     def __build_keras_model(self):
@@ -104,147 +224,13 @@ class NN_with_EntityEmbedding(Model):
         model_day.add(Reshape(dims=(10,)))
         models.append(model_day)
 
-        model_stateholiday = Sequential()
-        model_stateholiday.add(Embedding(4, 3, input_length=1))
-        model_stateholiday.add(Reshape(dims=(3,)))
-        models.append(model_stateholiday)
-
-        model_school = Sequential()
-        model_school.add(Dense(1, input_dim=1))
-        models.append(model_school)
-
-        model_competemonths = Sequential()
-        model_competemonths.add(Embedding(25, 2, input_length=1))
-        model_competemonths.add(Reshape(dims=(2,)))
-        models.append(model_competemonths)
-
-        model_promo2weeks = Sequential()
-        model_promo2weeks.add(Embedding(26, 1, input_length=1))
-        model_promo2weeks.add(Reshape(dims=(1,)))
-        models.append(model_promo2weeks)
-
-        model_lastestpromo2months = Sequential()
-        model_lastestpromo2months.add(Embedding(4, 1, input_length=1))
-        model_lastestpromo2months.add(Reshape(dims=(1,)))
-        models.append(model_lastestpromo2months)
-
-        model_distance = Sequential()
-        model_distance.add(Dense(1, input_dim=1))
-        models.append(model_distance)
-
-        model_storetype = Sequential()
-        model_storetype.add(Embedding(5, 2, input_length=1))
-        model_storetype.add(Reshape(dims=(2,)))
-        models.append(model_storetype)
-
-        model_assortment = Sequential()
-        model_assortment.add(Embedding(4, 3, input_length=1))
-        model_assortment.add(Reshape(dims=(3,)))
-        models.append(model_assortment)
-
-        model_promointerval = Sequential()
-        model_promointerval.add(Embedding(4, 3, input_length=1))
-        model_promointerval.add(Reshape(dims=(3,)))
-        models.append(model_promointerval)
-
-        model_competyear = Sequential()
-        model_competyear.add(Embedding(18, 4, input_length=1))
-        model_competyear.add(Reshape(dims=(4,)))
-        models.append(model_competyear)
-
-        model_promotyear = Sequential()
-        model_promotyear.add(Embedding(8, 4, input_length=1))
-        model_promotyear.add(Reshape(dims=(4,)))
-        models.append(model_promotyear)
-
         model_germanstate = Sequential()
         model_germanstate.add(Embedding(12, 6, input_length=1))
         model_germanstate.add(Reshape(dims=(6,)))
         models.append(model_germanstate)
 
-        model_woy = Sequential()
-        model_woy.add(Embedding(53, 2, input_length=1))
-        model_woy.add(Reshape(dims=(2,)))
-        models.append(model_woy)
-
-        model_temperature = Sequential()
-        model_temperature.add(Dense(3, input_dim=3))
-        models.append(model_temperature)
-
-        model_humidity = Sequential()
-        model_humidity.add(Dense(3, input_dim=3))
-        models.append(model_humidity)
-
-        model_wind = Sequential()
-        model_wind.add(Dense(2, input_dim=2))
-        models.append(model_wind)
-
-        model_cloud = Sequential()
-        model_cloud.add(Dense(1, input_dim=1))
-        models.append(model_cloud)
-
-        model_weatherevent = Sequential()
-        model_weatherevent.add(Embedding(22, 4, input_length=1))
-        model_weatherevent.add(Reshape(dims=(4,)))
-        models.append(model_weatherevent)
-
-        model_promo_forward = Sequential()
-        model_promo_forward.add(Embedding(8, 1, input_length=1))
-        model_promo_forward.add(Reshape(dims=(1,)))
-        models.append(model_promo_forward)
-
-        model_promo_backward = Sequential()
-        model_promo_backward.add(Embedding(8, 1, input_length=1))
-        model_promo_backward.add(Reshape(dims=(1,)))
-        models.append(model_promo_backward)
-
-        model_stateholiday_forward = Sequential()
-        model_stateholiday_forward.add(Embedding(8, 1, input_length=1))
-        model_stateholiday_forward.add(Reshape(dims=(1,)))
-        models.append(model_stateholiday_forward)
-
-        model_sateholiday_backward = Sequential()
-        model_sateholiday_backward.add(Embedding(8, 1, input_length=1))
-        model_sateholiday_backward.add(Reshape(dims=(1,)))
-        models.append(model_sateholiday_backward)
-
-        model_stateholiday_count_forward = Sequential()
-        model_stateholiday_count_forward.add(Embedding(3, 1, input_length=1))
-        model_stateholiday_count_forward.add(Reshape(dims=(1,)))
-        models.append(model_stateholiday_count_forward)
-
-        model_stateholiday_count_backward = Sequential()
-        model_stateholiday_count_backward.add(Embedding(3, 1, input_length=1))
-        model_stateholiday_count_backward.add(Reshape(dims=(1,)))
-        models.append(model_stateholiday_count_backward)
-
-        model_schoolholiday_forward = Sequential()
-        model_schoolholiday_forward.add(Embedding(8, 1, input_length=1))
-        model_schoolholiday_forward.add(Reshape(dims=(1,)))
-        models.append(model_schoolholiday_forward)
-
-        model_schoolholiday_backward = Sequential()
-        model_schoolholiday_backward.add(Embedding(8, 1, input_length=1))
-        model_schoolholiday_backward.add(Reshape(dims=(1,)))
-        models.append(model_schoolholiday_backward)
-
-        model_googletrend_de = Sequential()
-        model_googletrend_de.add(Dense(1, input_dim=1))
-        models.append(model_googletrend_de)
-
-        model_googletrend_state = Sequential()
-        model_googletrend_state.add(Dense(1, input_dim=1))
-        models.append(model_googletrend_state)
-
-        # model_weather = Sequential()
-        # model_weather.add(Merge([model_temperature, model_humidity, model_wind, model_weatherevent], mode='concat'))
-        # model_weather.add(Dense(1))
-        # model_weather.add(Activation('relu'))
-        # models.append(model_weather)
-
         self.model = Sequential()
         self.model.add(Merge(models, mode='concat'))
-        self.model.add(Dropout(0.02))
         self.model.add(Dense(1000, init='uniform'))
         self.model.add(Activation('relu'))
         self.model.add(Dense(500, init='uniform'))
@@ -261,19 +247,58 @@ class NN_with_EntityEmbedding(Model):
     def _val_for_pred(self, val):
         return numpy.exp(val * self.max_log_y)
 
-    def fit(self):
-        if self.train_ratio < 1:
-            self.model.fit(self.preprocessing(self.X), self._val_for_fit(self.y),
-                           validation_data=(self.preprocessing(self.X_val), self._val_for_fit(self.y_val)),
-                           nb_epoch=self.nb_epoch, batch_size=128,
-                           # callbacks=[self.checkpointer],
-                           )
-            # self.model.load_weights('best_model_weights.hdf5')
-            print("Result on validation data: ", self.evaluate())
-        else:
-            self.model.fit(self.preprocessing(self.X), self._val_for_fit(self.y),
-                           nb_epoch=self.nb_epoch, batch_size=128)
+    def fit(self, X_train, y_train, X_val, y_val):
+        self.model.fit(self.preprocessing(X_train), self._val_for_fit(y_train),
+                       validation_data=(self.preprocessing(X_val), self._val_for_fit(y_val)),
+                       nb_epoch=self.nb_epoch, batch_size=128,
+                       # callbacks=[self.checkpointer],
+                       )
+        # self.model.load_weights('best_model_weights.hdf5')
+        print("Result on validation data: ", self.evaluate(X_val, y_val))
 
-    def guess(self, feature):
-        feature = numpy.array(feature).reshape(1, -1)
-        return self._val_for_pred(self.model.predict(self.preprocessing(feature)))[0][0]
+    def guess(self, features):
+        features = self.preprocessing(features)
+        result = self.model.predict(features).flatten()
+        return self._val_for_pred(result)
+
+
+class NN(Model):
+
+    def __init__(self, X_train, y_train, X_val, y_val):
+        super().__init__()
+        self.nb_epoch = 10
+        self.checkpointer = ModelCheckpoint(filepath="best_model_weights.hdf5", verbose=1, save_best_only=True)
+        self.max_log_y = max(numpy.max(numpy.log(y_train)), numpy.max(numpy.log(y_val)))
+        self.__build_keras_model()
+        self.fit(X_train, y_train, X_val, y_val)
+
+    def __build_keras_model(self):
+        self.model = Sequential()
+        self.model.add(Dense(1000, init='uniform', input_dim=1183))
+        self.model.add(Activation('relu'))
+        self.model.add(Dense(500, init='uniform'))
+        self.model.add(Activation('relu'))
+        self.model.add(Dense(1))
+        self.model.add(Activation('sigmoid'))
+
+        self.model.compile(loss='mean_absolute_error', optimizer='adam')
+
+    def _val_for_fit(self, val):
+        val = numpy.log(val) / self.max_log_y
+        return val
+
+    def _val_for_pred(self, val):
+        return numpy.exp(val * self.max_log_y)
+
+    def fit(self, X_train, y_train, X_val, y_val):
+        self.model.fit(X_train, self._val_for_fit(y_train),
+                       validation_data=(X_val, self._val_for_fit(y_val)),
+                       nb_epoch=self.nb_epoch, batch_size=128,
+                       # callbacks=[self.checkpointer],
+                       )
+        # self.model.load_weights('best_model_weights.hdf5')
+        print("Result on validation data: ", self.evaluate(X_val, y_val))
+
+    def guess(self, features):
+        result = self.model.predict(features).flatten()
+        return self._val_for_pred(result)
