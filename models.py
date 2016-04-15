@@ -127,7 +127,6 @@ class XGBoost(Model):
 
     def __init__(self, X_train, y_train, X_val, y_val):
         super().__init__()
-        self.__normalize_data()
         dtrain = xgb.DMatrix(X_train, label=numpy.log(y_train))
         evallist = [(dtrain, 'train')]
         param = {'nthread': -1,
