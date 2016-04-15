@@ -195,8 +195,8 @@ class NN_with_EntityEmbedding(Model):
         models = []
 
         model_store = Sequential()
-        model_store.add(Embedding(1115, 50, input_length=1))
-        model_store.add(Reshape(dims=(50,)))
+        model_store.add(Embedding(1115, 10, input_length=1))
+        model_store.add(Reshape(dims=(10,)))
         models.append(model_store)
 
         model_dow = Sequential()
