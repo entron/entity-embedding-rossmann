@@ -2,29 +2,27 @@ This is the code used in the paper *"Entity Embeddings of Categorical Variables"
 
 To run the code one needs first download and unzip the `train.csv` and `store.csv` files on [Kaggle](https://www.kaggle.com/c/rossmann-store-sales/data) and put them inside this folder.
 
-Next run the following scripts to extract and prepare features:
+The following packages is need if you want to recover the result in the paper (we used python 3):
 
 ```
-python3 extract.py
+pip3 install -U scikit-learn
+pip3 install -U xgboost
+pip3 install -U keras
+```
+Please refer to [Keras](https://github.com/fchollet/keras) for more details for isntalling keras.
+
+Next run the following scripts to extract csv files and prepare features:
+
+```
+python3 extract_csv_files.py
 python3 prepare_features.py
 ``` 
 
-To test the neural network model run (you need to have [keras](https://github.com/fchollet/keras) installed first)
+To run the models:
 
 ```
-python3 test_model.py
+python3 train_test_model.py
 ```
-
-By default it will run one neural net with 0.97 data for training and the rest for test. It takes 20 minutes to run on Nvidia GTX 980 GPU, and it may take a few hours to run on CPU. 
-
-You can change these two parameters in `test_model.py` if you want to use more models or a different train-test ratio, and the following is what I used for finial submission:
-
-```
-num_networks = 10
-train_ratio = 1
-```
-
-After the script finishes it will generate a file `predictions.csv` which is used for submission to Kaggle.
 
 You can anaylize the embeddings with the ipython notebook included. This is the learned embeeding of German States printed in 2D:
 

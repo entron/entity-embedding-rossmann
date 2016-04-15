@@ -7,45 +7,46 @@ sys.setrecursionlimit(10000)
 train_ratio = 0.9
 shuffle_data = False
 one_hot_as_input = False
-
 embeddings_as_input = False
-saved_embeddings_fname = "embeddings_unshuffled.pickle"
+saved_embeddings_fname = "embeddings_unshuffled.pickle"  # Use plot_embeddings.ipynb to create
 
 f = open('feature_train_data.pickle', 'rb')
 (X, y) = pickle.load(f)
 
 num_records = len(X)
 train_size = int(train_ratio * num_records)
-val_size = num_records - train_size
 
 if shuffle_data:
+    print("Using shuffled data")
     sh = numpy.arange(X.shape[0])
     numpy.random.shuffle(sh)
     X = X[sh]
     y = y[sh]
 
 if embeddings_as_input:
+    print("Using learned embeddings as input")
     X = embed_features(X, saved_embeddings_fname)
 
 if one_hot_as_input:
+    print("Using one-hot encoding as input")
     enc = OneHotEncoder(sparse=False)
     enc.fit(X)
     X = enc.transform(X)
 
 X_train = X[:train_size]
-X_val = X[train_size:(train_size + val_size)]
+X_val = X[train_size:]
 y_train = y[:train_size]
-y_val = y[train_size:(train_size + val_size)]
-data = [X_train, y_train, X_val, y_val]
+y_val = y[train_size:]
 
+# data = [X_train, y_train, X_val, y_val]
 # with open('data.pickle', 'wb') as f:
 #     pickle.dump(data, f, -1)
 
 models = []
 
-# print("Fitting NN_with_EntityEmbedding...")
-# for i in range(5):
-#     models.append(NN_with_EntityEmbedding(X_train, y_train, X_val, y_val))
+print("Fitting NN_with_EntityEmbedding...")
+for i in range(5):
+    models.append(NN_with_EntityEmbedding(X_train, y_train, X_val, y_val))
 
 # print("Fitting NN...")
 # for i in range(5):
@@ -65,7 +66,6 @@ models = []
 
 # print("Fitting HistricalMedian...")
 # models.append(HistricalMedian(X_train, y_train, X_val, y_val))
-
 
 with open('models.pickle', 'wb') as f:
     pickle.dump(models, f)
