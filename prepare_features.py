@@ -40,13 +40,11 @@ def feature_list(record):
 train_data_X = []
 train_data_y = []
 
-keep_ratio = 0.1  # To simulate data sparsity by only keep small portion of data
 for record in train_data:
     if record['Sales'] != '0' and record['Open'] != '':
-        if random.random() < keep_ratio:
-            fl = feature_list(record)
-            train_data_X.append(fl)
-            train_data_y.append(int(record['Sales']))
+        fl = feature_list(record)
+        train_data_X.append(fl)
+        train_data_y.append(int(record['Sales']))
 print("Number of train datapoints: ", len(train_data_y))
 
 print(min(train_data_y), max(train_data_y))

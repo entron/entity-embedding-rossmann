@@ -2,6 +2,7 @@ import pickle
 from models import *
 import numpy
 numpy.random.seed(42)
+from sklearn.preprocessing import OneHotEncoder
 import sys
 sys.setrecursionlimit(10000)
 
@@ -39,6 +40,15 @@ X_val = X[train_size:]
 y_train = y[:train_size]
 y_val = y[train_size:]
 
+
+def sample(X, y, n):
+    '''random samples'''
+    num_row = X.shape[0]
+    indices = numpy.random.randint(num_row, size=n)
+    return X[indices, :], y[indices]
+
+X_train, y_train = sample(X_train, y_train, 100000)  # Simulate data sparsity
+
 # data = [X_train, y_train, X_val, y_val]
 # with open('data.pickle', 'wb') as f:
 #     pickle.dump(data, f, -1)
@@ -51,7 +61,7 @@ for i in range(5):
 
 # print("Fitting NN...")
 # for i in range(5):
-#    models.append(NN(X_train, y_train, X_val, y_val))
+#     models.append(NN(X_train, y_train, X_val, y_val))
 
 # print("Fitting LinearModel...")
 # models.append(LinearModel(sX_train, y_train, X_val, y_val))
