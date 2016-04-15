@@ -3,6 +3,7 @@ from datetime import datetime
 from sklearn import preprocessing
 import numpy as np
 import random
+random.seed(42)
 
 with open('train_data.pickle', 'rb') as f:
     train_data = pickle.load(f)

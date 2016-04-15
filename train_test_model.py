@@ -1,6 +1,7 @@
 import pickle
 from models import *
 import numpy
+numpy.random.seed(42)
 import sys
 sys.setrecursionlimit(10000)
 
