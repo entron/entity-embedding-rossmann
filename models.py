@@ -1,8 +1,9 @@
+import numpy
+numpy.random.seed(42)
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
-import numpy
 import xgboost as xgb
 from sklearn import neighbors
 from sklearn.preprocessing import Normalizer
