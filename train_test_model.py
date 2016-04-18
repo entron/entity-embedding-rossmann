@@ -7,13 +7,13 @@ import sys
 from sklearn.preprocessing import OneHotEncoder
 sys.setrecursionlimit(10000)
 
-sample_ratio = 0.02
-train_ratio = 0.8
-load_sampled_data = True
+sample_ratio = 0.025
+train_ratio = 0.5
 shuffle_data = False
-one_hot_as_input = False
+one_hot_as_input = True
 embeddings_as_input = False
-saved_embeddings_fname = "embeddings_unshuffled.pickle"  # Use plot_embeddings.ipynb to create
+# saved_embeddings_fname = "embeddings_unshuffled.pickle"  # Use plot_embeddings.ipynb to create
+saved_embeddings_fname = "embeddings_shuffled.pickle"
 
 f = open('feature_train_data.pickle', 'rb')
 (X, y) = pickle.load(f)
@@ -25,20 +25,10 @@ def sample(X, y, n):
     indices = numpy.sort(indices)
     return X[indices, :], y[indices]
 
-if not load_sampled_data:
-    num_records = len(X)
-    sample_size = int(sample_ratio * num_records)
+num_records = len(X)
+sample_size = int(sample_ratio * num_records)
 
-    X_sample, y_sample = sample(X, y, sample_size)  # Simulate data sparsity
-
-    data = [X_sample, y_sample]
-    with open('data.pickle', 'wb') as f:
-        pickle.dump(data, f, -1)
-
-else:
-    print("load sampled data")
-    [X_sample, y_sample] = pickle.load(open("data.pickle", "rb"))
-    sample_size = X_sample.shape[0]
+X_sample, y_sample = sample(X, y, sample_size)  # Simulate data sparsity
 
 assert(sample_size == X_sample.shape[0])
 
@@ -68,13 +58,13 @@ y_val = y_sample[train_size:]
 
 models = []
 
-print("Fitting NN_with_EntityEmbedding...")
-for i in range(5):
-    models.append(NN_with_EntityEmbedding(X_train, y_train, X_val, y_val))
-
-# print("Fitting NN...")
+# print("Fitting NN_with_EntityEmbedding...")
 # for i in range(5):
-#    models.append(NN(X_train, y_train, X_val, y_val))
+#    models.append(NN_with_EntityEmbedding(X_train, y_train, X_val, y_val))
+
+print("Fitting NN...")
+for i in range(5):
+    models.append(NN(X_train, y_train, X_val, y_val))
 
 # print("Fitting LinearModel...")
 # models.append(LinearModel(sX_train, y_train, X_val, y_val))
@@ -91,8 +81,8 @@ for i in range(5):
 # print("Fitting HistricalMedian...")
 # models.append(HistricalMedian(X_train, y_train, X_val, y_val))
 
-# with open('models.pickle', 'wb') as f:
-#     pickle.dump(models, f)
+with open('models.pickle', 'wb') as f:
+     pickle.dump(models, f)
 
 
 def evaluate_models(models, X, y):
