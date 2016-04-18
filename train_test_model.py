@@ -7,7 +7,9 @@ import sys
 from sklearn.preprocessing import OneHotEncoder
 sys.setrecursionlimit(10000)
 
-train_ratio = 0.1
+sample_ratio = 0.02
+train_ratio = 0.8
+load_sampled_data = True
 shuffle_data = False
 one_hot_as_input = False
 embeddings_as_input = False
@@ -16,43 +18,53 @@ saved_embeddings_fname = "embeddings_unshuffled.pickle"  # Use plot_embeddings.i
 f = open('feature_train_data.pickle', 'rb')
 (X, y) = pickle.load(f)
 
-num_records = len(X)
-train_size = int(train_ratio * num_records)
+def sample(X, y, n):
+    '''random samples'''
+    num_row = X.shape[0]
+    indices = numpy.random.randint(num_row, size=n)
+    indices = numpy.sort(indices)
+    return X[indices, :], y[indices]
+
+if not load_sampled_data:
+    num_records = len(X)
+    sample_size = int(sample_ratio * num_records)
+
+    X_sample, y_sample = sample(X, y, sample_size)  # Simulate data sparsity
+
+    data = [X_sample, y_sample]
+    with open('data.pickle', 'wb') as f:
+        pickle.dump(data, f, -1)
+
+else:
+    print("load sampled data")
+    [X_sample, y_sample] = pickle.load(open("data.pickle", "rb"))
+    sample_size = X_sample.shape[0]
+
+assert(sample_size == X_sample.shape[0])
 
 if shuffle_data:
     print("Using shuffled data")
-    sh = numpy.arange(X.shape[0])
+    sh = numpy.arange(X_sample.shape[0])
     numpy.random.shuffle(sh)
-    X = X[sh]
-    y = y[sh]
+    X_sample = X_sample[sh]
+    y_sample = y_sample[sh]
 
 if embeddings_as_input:
     print("Using learned embeddings as input")
-    X = embed_features(X, saved_embeddings_fname)
+    X_sample = embed_features(X_sample, saved_embeddings_fname)
 
 if one_hot_as_input:
     print("Using one-hot encoding as input")
     enc = OneHotEncoder(sparse=False)
     enc.fit(X)
-    X = enc.transform(X)
+    X_sample = enc.transform(X_sample)
 
-X_train = X[:train_size]
-X_val = X[train_size:(train_size + 10000)]
-y_train = y[:train_size]
-y_val = y[train_size:(train_size + 10000)]
+train_size = int(train_ratio * sample_size)
 
-
-def sample(X, y, n):
-    '''random samples'''
-    num_row = X.shape[0]
-    indices = numpy.random.randint(num_row, size=n)
-    return X[indices, :], y[indices]
-
-X_train, y_train = sample(X_train, y_train, 100000)  # Simulate data sparsity
-
-# data = [X_train, y_train, X_val, y_val]
-# with open('data.pickle', 'wb') as f:
-#     pickle.dump(data, f, -1)
+X_train = X_sample[:train_size]
+X_val = X_sample[train_size:]
+y_train = y_sample[:train_size]
+y_val = y_sample[train_size:]
 
 models = []
 
@@ -62,7 +74,7 @@ for i in range(5):
 
 # print("Fitting NN...")
 # for i in range(5):
-#     models.append(NN(X_train, y_train, X_val, y_val))
+#    models.append(NN(X_train, y_train, X_val, y_val))
 
 # print("Fitting LinearModel...")
 # models.append(LinearModel(sX_train, y_train, X_val, y_val))
