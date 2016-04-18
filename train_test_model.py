@@ -2,9 +2,10 @@ import pickle
 from models import *
 import numpy
 import sys
+from sklearn.preprocessing import OneHotEncoder
 sys.setrecursionlimit(10000)
 
-train_ratio = 0.9
+train_ratio = 0.1
 shuffle_data = False
 one_hot_as_input = False
 embeddings_as_input = False
@@ -34,9 +35,9 @@ if one_hot_as_input:
     X = enc.transform(X)
 
 X_train = X[:train_size]
-X_val = X[train_size:]
+X_val = X[train_size:(train_size + 10000)]
 y_train = y[:train_size]
-y_val = y[train_size:]
+y_val = y[train_size:(train_size + 10000)]
 
 # data = [X_train, y_train, X_val, y_val]
 # with open('data.pickle', 'wb') as f:
