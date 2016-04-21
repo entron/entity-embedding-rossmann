@@ -65,9 +65,6 @@ for i in range(5):
 # for i in range(5):
 #     models.append(NN(X_train, y_train, X_val, y_val))
 
-# print("Fitting LinearModel...")
-# models.append(LinearModel(sX_train, y_train, X_val, y_val))
-
 # print("Fitting RF...")
 # models.append(RF(X_train, y_train, X_val, y_val))
 
@@ -76,9 +73,6 @@ for i in range(5):
 
 # print("Fitting XGBoost...")
 # models.append(XGBoost(X_train, y_train, X_val, y_val))
-
-# print("Fitting HistricalMedian...")
-# models.append(HistricalMedian(X_train, y_train, X_val, y_val))
 
 # with open('models.pickle', 'wb') as f:
 #     pickle.dump(models, f)
