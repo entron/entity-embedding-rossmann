@@ -1,5 +1,5 @@
 import numpy
-numpy.random.seed(42)
+numpy.random.seed(123)
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
