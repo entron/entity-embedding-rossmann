@@ -48,8 +48,7 @@ def sample(X, y, n):
     return X[indices, :], y[indices]
 
 X_train, y_train = sample(X_train, y_train, 200000)  # Simulate data sparsity
-print(X_train.shape)
-print(y_train.shape)
+print("Number of samples used for training: " + str(y_train.shape[0]))
 
 # data = [X_train, y_train, X_val, y_val]
 # with open('data.pickle', 'wb') as f:
