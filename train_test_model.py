@@ -1,7 +1,7 @@
 import pickle
-from models import *
 import numpy
 numpy.random.seed(123)
+from models import *
 from sklearn.preprocessing import OneHotEncoder
 import sys
 sys.setrecursionlimit(10000)
@@ -10,7 +10,9 @@ train_ratio = 0.9
 shuffle_data = False
 one_hot_as_input = False
 embeddings_as_input = False
-saved_embeddings_fname = "embeddings_unshuffled.pickle"  # Use plot_embeddings.ipynb to create
+save_embeddings = False
+save_models = False
+saved_embeddings_fname = "embeddings.pickle"  # Use plot_embeddings.ipynb to create
 
 f = open('feature_train_data.pickle', 'rb')
 (X, y) = pickle.load(f)
@@ -50,10 +52,6 @@ def sample(X, y, n):
 X_train, y_train = sample(X_train, y_train, 200000)  # Simulate data sparsity
 print("Number of samples used for training: " + str(y_train.shape[0]))
 
-# data = [X_train, y_train, X_val, y_val]
-# with open('data.pickle', 'wb') as f:
-#     pickle.dump(data, f, -1)
-
 models = []
 
 print("Fitting NN_with_EntityEmbedding...")
@@ -73,8 +71,23 @@ for i in range(5):
 # print("Fitting XGBoost...")
 # models.append(XGBoost(X_train, y_train, X_val, y_val))
 
-# with open('models.pickle', 'wb') as f:
-#     pickle.dump(models, f)
+
+if save_embeddings:
+    model = models[0].model
+    weights = model.layers[0].get_weights()
+    store_embedding = weights[0]
+    dow_embedding = weights[1]
+    year_embedding = weights[4]
+    month_embedding = weights[5]
+    day_embedding = weights[6]
+    german_states_embedding = weights[7]
+    with open(saved_embeddings_fname, 'wb') as f:
+        pickle.dump([store_embedding, dow_embedding, year_embedding,
+                    month_embedding, day_embedding, german_states_embedding], f, -1)
+
+if save_models:
+    with open('models.pickle', 'wb') as f:
+        pickle.dump(models, f)
 
 
 def evaluate_models(models, X, y):
