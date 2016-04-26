@@ -74,7 +74,7 @@ for i in range(5):
 
 if save_embeddings:
     model = models[0].model
-    weights = model.layers[0].get_weights()
+    weights = model.get_weights()
     store_embedding = weights[0]
     dow_embedding = weights[1]
     year_embedding = weights[4]

@@ -196,12 +196,12 @@ class NN_with_EntityEmbedding(Model):
 
         model_store = Sequential()
         model_store.add(Embedding(1115, 10, input_length=1))
-        model_store.add(Reshape(dims=(10,)))
+        model_store.add(Reshape(target_shape=(10,)))
         models.append(model_store)
 
         model_dow = Sequential()
         model_dow.add(Embedding(7, 6, input_length=1))
-        model_dow.add(Reshape(dims=(6,)))
+        model_dow.add(Reshape(target_shape=(6,)))
         models.append(model_dow)
 
         model_promo = Sequential()
@@ -210,22 +210,22 @@ class NN_with_EntityEmbedding(Model):
 
         model_year = Sequential()
         model_year.add(Embedding(3, 2, input_length=1))
-        model_year.add(Reshape(dims=(2,)))
+        model_year.add(Reshape(target_shape=(2,)))
         models.append(model_year)
 
         model_month = Sequential()
         model_month.add(Embedding(12, 6, input_length=1))
-        model_month.add(Reshape(dims=(6,)))
+        model_month.add(Reshape(target_shape=(6,)))
         models.append(model_month)
 
         model_day = Sequential()
         model_day.add(Embedding(31, 10, input_length=1))
-        model_day.add(Reshape(dims=(10,)))
+        model_day.add(Reshape(target_shape=(10,)))
         models.append(model_day)
 
         model_germanstate = Sequential()
         model_germanstate.add(Embedding(12, 6, input_length=1))
-        model_germanstate.add(Reshape(dims=(6,)))
+        model_germanstate.add(Reshape(target_shape=(6,)))
         models.append(model_germanstate)
 
         self.model = Sequential()
