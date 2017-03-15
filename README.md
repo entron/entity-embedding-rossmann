@@ -7,7 +7,7 @@ The following packages is need if you want to recover the result in the paper (w
 ```
 pip3 install -U scikit-learn
 pip3 install -U xgboost
-pip3 install -U keras==1.2.2
+pip3 install keras==1.2.2
 ```
 Please refer to [Keras](https://github.com/fchollet/keras) for more details regarding isntalling keras.
 
