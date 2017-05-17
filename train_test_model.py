@@ -12,7 +12,7 @@ one_hot_as_input = False
 embeddings_as_input = False
 save_embeddings = False
 save_models = False
-saved_embeddings_fname = "embeddings.pickle"  # Use plot_embeddings.ipynb to create
+saved_embeddings_fname = "embeddings.pickle"  # set save_embeddings to True to create this file
 
 f = open('feature_train_data.pickle', 'rb')
 (X, y) = pickle.load(f)
