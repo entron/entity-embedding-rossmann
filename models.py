@@ -9,7 +9,8 @@ from sklearn import neighbors
 from sklearn.preprocessing import Normalizer
 
 from keras.models import Sequential
-from keras.layers.core import Dense, Activation, Merge, Reshape
+from keras.layers.core import Dense, Activation, Reshape
+from keras.layers import Merge
 from keras.layers.embeddings import Embedding
 from keras.callbacks import ModelCheckpoint
 
@@ -181,7 +182,7 @@ class NN_with_EntityEmbedding(Model):
 
     def __init__(self, X_train, y_train, X_val, y_val):
         super().__init__()
-        self.nb_epoch = 10
+        self.epochs = 10
         self.checkpointer = ModelCheckpoint(filepath="best_model_weights.hdf5", verbose=1, save_best_only=True)
         self.max_log_y = max(numpy.max(numpy.log(y_train)), numpy.max(numpy.log(y_val)))
         self.__build_keras_model()
@@ -230,9 +231,9 @@ class NN_with_EntityEmbedding(Model):
 
         self.model = Sequential()
         self.model.add(Merge(models, mode='concat'))
-        self.model.add(Dense(1000, init='uniform'))
+        self.model.add(Dense(1000, kernel_initializer="uniform"))
         self.model.add(Activation('relu'))
-        self.model.add(Dense(500, init='uniform'))
+        self.model.add(Dense(500, kernel_initializer="uniform"))
         self.model.add(Activation('relu'))
         self.model.add(Dense(1))
         self.model.add(Activation('sigmoid'))
@@ -249,7 +250,7 @@ class NN_with_EntityEmbedding(Model):
     def fit(self, X_train, y_train, X_val, y_val):
         self.model.fit(self.preprocessing(X_train), self._val_for_fit(y_train),
                        validation_data=(self.preprocessing(X_val), self._val_for_fit(y_val)),
-                       nb_epoch=self.nb_epoch, batch_size=128,
+                       epochs=self.epochs, batch_size=128,
                        # callbacks=[self.checkpointer],
                        )
         # self.model.load_weights('best_model_weights.hdf5')
@@ -265,7 +266,7 @@ class NN(Model):
 
     def __init__(self, X_train, y_train, X_val, y_val):
         super().__init__()
-        self.nb_epoch = 10
+        self.epochs = 10
         self.checkpointer = ModelCheckpoint(filepath="best_model_weights.hdf5", verbose=1, save_best_only=True)
         self.max_log_y = max(numpy.max(numpy.log(y_train)), numpy.max(numpy.log(y_val)))
         self.__build_keras_model()
@@ -273,9 +274,9 @@ class NN(Model):
 
     def __build_keras_model(self):
         self.model = Sequential()
-        self.model.add(Dense(1000, init='uniform', input_dim=1183))
+        self.model.add(Dense(1000, kernel_initializer="uniform", input_dim=1183))
         self.model.add(Activation('relu'))
-        self.model.add(Dense(500, init='uniform'))
+        self.model.add(Dense(500, kernel_initializer="uniform"))
         self.model.add(Activation('relu'))
         self.model.add(Dense(1))
         self.model.add(Activation('sigmoid'))
@@ -292,7 +293,7 @@ class NN(Model):
     def fit(self, X_train, y_train, X_val, y_val):
         self.model.fit(X_train, self._val_for_fit(y_train),
                        validation_data=(X_val, self._val_for_fit(y_val)),
-                       nb_epoch=self.nb_epoch, batch_size=128,
+                       epochs=self.epochs, batch_size=128,
                        # callbacks=[self.checkpointer],
                        )
         # self.model.load_weights('best_model_weights.hdf5')
