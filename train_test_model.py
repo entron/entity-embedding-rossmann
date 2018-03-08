@@ -55,7 +55,7 @@ print("Number of samples used for training: " + str(y_train.shape[0]))
 models = []
 
 print("Fitting NN_with_EntityEmbedding...")
-for i in range(1):
+for i in range(5):
     models.append(NN_with_EntityEmbedding(X_train, y_train, X_val, y_val))
 
 # print("Fitting NN...")
@@ -74,13 +74,12 @@ for i in range(1):
 
 if save_embeddings:
     model = models[0].model
-    weights = model.get_weights()
-    store_embedding = weights[0]
-    dow_embedding = weights[1]
-    year_embedding = weights[4]
-    month_embedding = weights[5]
-    day_embedding = weights[6]
-    german_states_embedding = weights[7]
+    store_embedding = model.get_layer('store_embedding').get_weights()[0]
+    dow_embedding = model.get_layer('dow_embedding').get_weights()[0]
+    year_embedding = model.get_layer('year_embedding').get_weights()[0]
+    month_embedding = model.get_layer('month_embedding').get_weights()[0]
+    day_embedding = model.get_layer('day_embedding').get_weights()[0]
+    german_states_embedding = model.get_layer('state_embedding').get_weights()[0]
     with open(saved_embeddings_fname, 'wb') as f:
         pickle.dump([store_embedding, dow_embedding, year_embedding,
                      month_embedding, day_embedding, german_states_embedding], f, -1)
