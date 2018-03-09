@@ -10,8 +10,7 @@ train_ratio = 0.9
 shuffle_data = False
 one_hot_as_input = False
 embeddings_as_input = False
-save_embeddings = False
-save_models = False
+save_embeddings = True
 saved_embeddings_fname = "embeddings.pickle"  # set save_embeddings to True to create this file
 
 f = open('feature_train_data.pickle', 'rb')
@@ -49,6 +48,7 @@ def sample(X, y, n):
     indices = numpy.random.randint(num_row, size=n)
     return X[indices, :], y[indices]
 
+
 X_train, y_train = sample(X_train, y_train, 200000)  # Simulate data sparsity
 print("Number of samples used for training: " + str(y_train.shape[0]))
 
@@ -74,20 +74,15 @@ for i in range(5):
 
 if save_embeddings:
     model = models[0].model
-    weights = model.get_weights()
-    store_embedding = weights[0]
-    dow_embedding = weights[1]
-    year_embedding = weights[4]
-    month_embedding = weights[5]
-    day_embedding = weights[6]
-    german_states_embedding = weights[7]
+    store_embedding = model.get_layer('store_embedding').get_weights()[0]
+    dow_embedding = model.get_layer('dow_embedding').get_weights()[0]
+    year_embedding = model.get_layer('year_embedding').get_weights()[0]
+    month_embedding = model.get_layer('month_embedding').get_weights()[0]
+    day_embedding = model.get_layer('day_embedding').get_weights()[0]
+    german_states_embedding = model.get_layer('state_embedding').get_weights()[0]
     with open(saved_embeddings_fname, 'wb') as f:
         pickle.dump([store_embedding, dow_embedding, year_embedding,
-                    month_embedding, day_embedding, german_states_embedding], f, -1)
-
-if save_models:
-    with open('models.pickle', 'wb') as f:
-        pickle.dump(models, f)
+                     month_embedding, day_embedding, german_states_embedding], f, -1)
 
 
 def evaluate_models(models, X, y):
@@ -97,6 +92,7 @@ def evaluate_models(models, X, y):
     relative_err = numpy.absolute((y - mean_sales) / y)
     result = numpy.sum(relative_err) / len(y)
     return result
+
 
 print("Evaluate combined models...")
 print("Training error...")

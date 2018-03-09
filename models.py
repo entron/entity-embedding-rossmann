@@ -9,7 +9,9 @@ from sklearn import neighbors
 from sklearn.preprocessing import Normalizer
 
 from keras.models import Sequential
-from keras.layers.core import Dense, Activation, Merge, Reshape
+from keras.models import Model as KerasModel
+from keras.layers import Input, Dense, Activation, Reshape
+from keras.layers import Concatenate
 from keras.layers.embeddings import Embedding
 from keras.callbacks import ModelCheckpoint
 
@@ -181,7 +183,7 @@ class NN_with_EntityEmbedding(Model):
 
     def __init__(self, X_train, y_train, X_val, y_val):
         super().__init__()
-        self.nb_epoch = 10
+        self.epochs = 10
         self.checkpointer = ModelCheckpoint(filepath="best_model_weights.hdf5", verbose=1, save_best_only=True)
         self.max_log_y = max(numpy.max(numpy.log(y_train)), numpy.max(numpy.log(y_val)))
         self.__build_keras_model()
@@ -192,50 +194,48 @@ class NN_with_EntityEmbedding(Model):
         return X_list
 
     def __build_keras_model(self):
-        models = []
+        input_store = Input(shape=(1,))
+        output_store = Embedding(1115, 10, name='store_embedding')(input_store)
+        output_store = Reshape(target_shape=(10,))(output_store)
 
-        model_store = Sequential()
-        model_store.add(Embedding(1115, 10, input_length=1))
-        model_store.add(Reshape(target_shape=(10,)))
-        models.append(model_store)
+        input_dow = Input(shape=(1,))
+        output_dow = Embedding(7, 6, name='dow_embedding')(input_dow)
+        output_dow = Reshape(target_shape=(6,))(output_dow)
 
-        model_dow = Sequential()
-        model_dow.add(Embedding(7, 6, input_length=1))
-        model_dow.add(Reshape(target_shape=(6,)))
-        models.append(model_dow)
+        input_promo = Input(shape=(1,))
+        output_promo = Dense(1)(input_promo)
 
-        model_promo = Sequential()
-        model_promo.add(Dense(1, input_dim=1))
-        models.append(model_promo)
+        input_year = Input(shape=(1,))
+        output_year = Embedding(3, 2, name='year_embedding')(input_year)
+        output_year = Reshape(target_shape=(2,))(output_year)
 
-        model_year = Sequential()
-        model_year.add(Embedding(3, 2, input_length=1))
-        model_year.add(Reshape(target_shape=(2,)))
-        models.append(model_year)
+        input_month = Input(shape=(1,))
+        output_month = Embedding(12, 6, name='month_embedding')(input_month)
+        output_month = Reshape(target_shape=(6,))(output_month)
 
-        model_month = Sequential()
-        model_month.add(Embedding(12, 6, input_length=1))
-        model_month.add(Reshape(target_shape=(6,)))
-        models.append(model_month)
+        input_day = Input(shape=(1,))
+        output_day = Embedding(31, 10, name='day_embedding')(input_day)
+        output_day = Reshape(target_shape=(10,))(output_day)
 
-        model_day = Sequential()
-        model_day.add(Embedding(31, 10, input_length=1))
-        model_day.add(Reshape(target_shape=(10,)))
-        models.append(model_day)
+        input_germanstate = Input(shape=(1,))
+        output_germanstate = Embedding(12, 6, name='state_embedding')(input_germanstate)
+        output_germanstate = Reshape(target_shape=(6,))(output_germanstate)
 
-        model_germanstate = Sequential()
-        model_germanstate.add(Embedding(12, 6, input_length=1))
-        model_germanstate.add(Reshape(target_shape=(6,)))
-        models.append(model_germanstate)
+        input_model = [input_store, input_dow, input_promo,
+                       input_year, input_month, input_day, input_germanstate]
 
-        self.model = Sequential()
-        self.model.add(Merge(models, mode='concat'))
-        self.model.add(Dense(1000, init='uniform'))
-        self.model.add(Activation('relu'))
-        self.model.add(Dense(500, init='uniform'))
-        self.model.add(Activation('relu'))
-        self.model.add(Dense(1))
-        self.model.add(Activation('sigmoid'))
+        output_embeddings = [output_store, output_dow, output_promo,
+                             output_year, output_month, output_day, output_germanstate]
+
+        output_model = Concatenate()(output_embeddings)
+        output_model = Dense(1000, kernel_initializer="uniform")(output_model)
+        output_model = Activation('relu')(output_model)
+        output_model = Dense(500, kernel_initializer="uniform")(output_model)
+        output_model = Activation('relu')(output_model)
+        output_model = Dense(1)(output_model)
+        output_model = Activation('sigmoid')(output_model)
+
+        self.model = KerasModel(inputs=input_model, outputs=output_model)
 
         self.model.compile(loss='mean_absolute_error', optimizer='adam')
 
@@ -249,7 +249,7 @@ class NN_with_EntityEmbedding(Model):
     def fit(self, X_train, y_train, X_val, y_val):
         self.model.fit(self.preprocessing(X_train), self._val_for_fit(y_train),
                        validation_data=(self.preprocessing(X_val), self._val_for_fit(y_val)),
-                       nb_epoch=self.nb_epoch, batch_size=128,
+                       epochs=self.epochs, batch_size=128,
                        # callbacks=[self.checkpointer],
                        )
         # self.model.load_weights('best_model_weights.hdf5')
@@ -265,7 +265,7 @@ class NN(Model):
 
     def __init__(self, X_train, y_train, X_val, y_val):
         super().__init__()
-        self.nb_epoch = 10
+        self.epochs = 10
         self.checkpointer = ModelCheckpoint(filepath="best_model_weights.hdf5", verbose=1, save_best_only=True)
         self.max_log_y = max(numpy.max(numpy.log(y_train)), numpy.max(numpy.log(y_val)))
         self.__build_keras_model()
@@ -273,9 +273,9 @@ class NN(Model):
 
     def __build_keras_model(self):
         self.model = Sequential()
-        self.model.add(Dense(1000, init='uniform', input_dim=1183))
+        self.model.add(Dense(1000, kernel_initializer="uniform", input_dim=1183))
         self.model.add(Activation('relu'))
-        self.model.add(Dense(500, init='uniform'))
+        self.model.add(Dense(500, kernel_initializer="uniform"))
         self.model.add(Activation('relu'))
         self.model.add(Dense(1))
         self.model.add(Activation('sigmoid'))
@@ -292,7 +292,7 @@ class NN(Model):
     def fit(self, X_train, y_train, X_val, y_val):
         self.model.fit(X_train, self._val_for_fit(y_train),
                        validation_data=(X_val, self._val_for_fit(y_val)),
-                       nb_epoch=self.nb_epoch, batch_size=128,
+                       epochs=self.epochs, batch_size=128,
                        # callbacks=[self.checkpointer],
                        )
         # self.model.load_weights('best_model_weights.hdf5')

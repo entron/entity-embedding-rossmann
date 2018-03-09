@@ -7,9 +7,9 @@ The following packages are needed if you want to recover the result in the paper
 ```
 pip3 install -U scikit-learn
 pip3 install -U xgboost
-pip3 install keras==1.2.2
+pip3 install keras
 ```
-Please refer to [Keras](https://github.com/fchollet/keras) for more details regarding how to install keras. Note that the code used keras 1.x API so make sure to install the right version of keras as shown above.
+Please refer to [Keras](https://github.com/fchollet/keras) for more details regarding how to install keras. 
 
 Next, run the following scripts to extract the csv files and prepare the features:
 
