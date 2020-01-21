@@ -16,7 +16,7 @@ Next, run the following scripts to extract the csv files and prepare the feature
 ```
 python3 extract_csv_files.py
 python3 prepare_features.py
-``` 
+```
 
 To run the models:
 
@@ -24,10 +24,9 @@ To run the models:
 python3 train_test_model.py
 ```
 
-You can anaylize the embeddings with [plot_embeddings.ipynb](https://github.com/entron/entity-embedding-rossmann/blob/master/plot_embeddings.ipynb). This is the learned embeeding of German States printed in 2D (with the Kaggle branch):
+You can anaylize the embeddings with [plot_embeddings.ipynb](https://github.com/entron/entity-embedding-rossmann/blob/master/plot_embeddings.ipynb). For example, the following are the learned embeeding of German States printed in 2D and the map of Germany side by side.   Considering the algorithm knows nothing about German geography the remarkable resemblance between the two demonstrates the power of the algorithm for abductive reasoning. I expect entity embedding will be a very useful tool to study the relationship of genome, proteins, drugs, diseases and I would love to see its applications in biology and medicine on day.
 
-[![](https://plot.ly/~entron/0/.png)](https://plot.ly/~entron/0.embed)
+Visualizaiton of Entity Embedding of German States in 2D             | Map of Germany 
+:-------------------------:|:-------------------------:
+![EE_German_States](images/EE_German_States.png)  | ![Karte-Deutschland-Fun-Facts-Deutsch](images/Karte-Deutschland-Fun-Facts-Deutsch.png) 
 
-and this is the learned embeddings of 1115 Rossmann stores printed in 3D:
-
-[![](https://plot.ly/~entron/2/.png)](https://plot.ly/~entron/2.embed)
