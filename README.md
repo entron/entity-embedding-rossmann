@@ -24,7 +24,7 @@ To run the models:
 python3 train_test_model.py
 ```
 
-You can anaylize the embeddings with the ipython notebook included. This is the learned embeeding of German States printed in 2D (with the Kaggle branch):
+You can anaylize the embeddings with [plot_embeddings.ipynb](https://github.com/entron/entity-embedding-rossmann/blob/master/plot_embeddings.ipynb). This is the learned embeeding of German States printed in 2D (with the Kaggle branch):
 
 [![](https://plot.ly/~entron/0/.png)](https://plot.ly/~entron/0.embed)
 
