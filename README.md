@@ -24,7 +24,7 @@ To run the models:
 python3 train_test_model.py
 ```
 
-You can anaylize the embeddings with [plot_embeddings.ipynb](https://github.com/entron/entity-embedding-rossmann/blob/master/plot_embeddings.ipynb). For example, the following are the learned embeeding of German States printed in 2D and the map of Germany side by side.   Considering the algorithm knows nothing about German geography the remarkable resemblance between the two demonstrates the power of the algorithm for abductive reasoning. I expect entity embedding will be a very useful tool to study the relationship of genome, proteins, drugs, diseases and I would love to see its applications in biology and medicine on day.
+You can anaylize the embeddings with [plot_embeddings.ipynb](https://github.com/entron/entity-embedding-rossmann/blob/master/plot_embeddings.ipynb). For example, the following are the learned embeeding of German States printed in 2D and the map of Germany side by side.   Considering the algorithm knows nothing about German geography the remarkable resemblance between the two demonstrates the power of the algorithm for abductive reasoning. I expect entity embedding will be a very useful tool to study the relationship of genome, proteins, drugs, diseases and I would love to see its applications in biology and medicine one day.
 
 Visualizaiton of Entity Embedding of German States in 2D             | Map of Germany 
 :-------------------------:|:-------------------------:
