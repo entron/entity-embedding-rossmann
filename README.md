@@ -2,12 +2,12 @@ This is the code used in the paper **"[Entity Embeddings of Categorical Variable
 
 To run the code one needs first download and unzip the `train.csv` and `store.csv` files on [Kaggle](https://www.kaggle.com/c/rossmann-store-sales/data) and put them in this folder.
 
-The following packages are needed if you want to recover the result in the paper (we used python 3):
+If you use [Anaconda](https://docs.conda.io/en/latest/miniconda.html) you can install the dependecies like the following example:
 
 ```
-pip3 install -U scikit-learn
-pip3 install -U xgboost
-pip3 install keras
+conda create --name ee python=3.7 pip
+conda activate ee
+pip install scikit-learn xgboost tensorflow keras jupyter matplotlib
 ```
 Please refer to [Keras](https://github.com/fchollet/keras) for more details regarding how to install keras. 
 
